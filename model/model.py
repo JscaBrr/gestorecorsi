@@ -5,6 +5,7 @@ class Model:
         self.c = None
 
     def getAllCorsi(self):
+        #si passa self perchè è un metodo di istanza
         return DAO.getAllCorsi()
 
     def getCorsiPD(self, pd):
@@ -15,7 +16,7 @@ class Model:
 
     def getIscrittiCodins(self, codins):
         objStudente = DAO.getIscrittiCodins(codins)
-        objStudente.sort(key=lambda s: s.cognome)
+        objStudente.sort(key=lambda s: s.cognome) #la chiave è un campo di Studente
         return objStudente
 
     def getCDSofCorso(self, codins):

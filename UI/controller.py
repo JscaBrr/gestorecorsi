@@ -33,7 +33,7 @@ class Controller:
             self._view.update_page()
             return
         objCorso = self._model.getCorsiPD(int(pd))
-        if objCorso is None:
+        if len(objCorso) == 0:
             self._view.alert("Nessun corso trovato")
         for obj in objCorso:
             self._view.lvTxtOut.controls.append(ft.Text(obj))
@@ -46,10 +46,11 @@ class Controller:
             self._view.alert("Periodo didattico non selezionato")
             self._view.update_page()
             return
-        objStudente = self._model.getIscrittiCorsiPD(int(pd))
-        if objStudente is None:
+        tuplaObjInt = self._model.getIscrittiCorsiPD(int(pd))
+        if len(tuplaObjInt) == 0:
             self._view.alert("Nessuno studente trovato")
-        self._view.lvTxtOut.controls.append(ft.Text(len(objStudente)))
+        for tupla in tuplaObjInt:
+            self._view.lvTxtOut.controls.append(ft.Text(f"{tupla[0]} - N Iscritti: {tupla[1]}"))
         self._view.update_page()
 
     def handlebtnPrintIscrittiCodins(self, e):
@@ -60,7 +61,7 @@ class Controller:
             self._view.update_page()
             return
         objStudente = self._model.getIscrittiCodins(codins)
-        if objStudente is None:
+        if len(objStudente) == 0:
             self._view.alert("Nessuno studente trovato")
         for obj in objStudente:
             self._view.lvTxtOut.controls.append(ft.Text(obj))

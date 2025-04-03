@@ -42,20 +42,24 @@ class DAO():
 
     @staticmethod
     def getIscrittiCorsiPD(pd):
+        #restituisce per ogni corso il numero di iscritti filtrati dal pd
         cnx = DBConnect.get_connection()
         cursor = cnx.cursor(dictionary=True)
-        query = """SELECT studente.*
-                    FROM studente
-                    JOIN iscrizione ON studente.matricola = iscrizione.matricola
-                    JOIN corso ON iscrizione.codins = corso.codins
-                    WHERE corso.pd = %s """
+        query = """SELECT c.codins, c.crediti, c.nome, c.pd, count(*) as n
+                        FROM corso c, iscrizione i
+                        where c.codins = i.codins 
+                        and c.pd = %s
+                        group by c.codins, c.crediti, c.nome, c.pd"""
         cursor.execute(query, (pd,))
-        objStudente = []
+        tuple = []
         for dizionario in cursor:
-            objStudente.append(Studente(**dizionario))
+            tuple.append((Corso(dizionario["codins"],
+                                   dizionario["crediti"],
+                                   dizionario["nome"],
+                                   dizionario["pd"]), dizionario["n"]))
         cursor.close()
         cnx.close()
-        return objStudente
+        return tuple
 
     @staticmethod
     def getIscrittiCodins(codins):
@@ -66,12 +70,18 @@ class DAO():
                    JOIN iscrizione ON studente.matricola = iscrizione.matricola 
                    JOIN corso ON iscrizione.codins = corso.codins
                    WHERE corso.codins = %s """
+        #oppure:
+        #SELECT s.*
+        #FROM studente s, iscrizione i
+        #WHERE s.matricola = i.matricola
+        #AND i.codins = %s
         cursor.execute(query, (codins,))
         objStudente = []
         for dizionario in cursor:
             objStudente.append(Studente(**dizionario))
         cursor.close()
         cnx.close()
+        #restituiti in ordine di matricola (PK)
         return objStudente
 
     @staticmethod
@@ -84,14 +94,24 @@ class DAO():
                             and i.codins = %s
                             and s.CDS != ""
                             group by s.CDS """
+        #oppure
+        #SELECT s.CDS, COUNT(*) as n
+        #FROM studente s
+        #JOIN iscrizione i ON s.matricola = i.matricola
+        #WHERE i.codins = %s
+        #AND s.CDS != ""
+        #GROUP BY s.CDS;
         cursor.execute(query, (codins,))
         tupla = []
         for row in cursor:
             tupla.append((row["CDS"], row["n"]))
         cursor.close()
         cnx.close()
+        #ordinati per matricola del primo studente che aveva quel corso
         return tupla
 
+if __name__ == '__main__':
+    print(DAO.getIscrittiCorsiPD(1))
 
 
 
